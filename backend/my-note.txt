@@ -1,0 +1,27 @@
+First Step.
+1. npm init
+2. give name
+3. click ENTER button on version
+4. give description
+5. Then click ENTER again and again 
+6. yes to end
+
+install express.js
+1. npm i express
+
+install mongoose for models and schema
+1. npm i mongoose
+
+To install nodemon as a dev dependency so that it won't be a part of the application
+npm i -D nodemon
+
+For user data/form validation search express validator.
+1. choose express-validator website.
+2. choose version 6.15.0 because newest ones are confusing and too short.
+
+For incryption and decryption of user's password use bcryjs(provides functions for hashing, salt and pepper)
+1. npm install bcryptjs or search bcryptjs click to npm website
+
+For user's authentication we use tokens for that we can user json web tokens(jwt)
+1. search jwt token/ json web token
+2. click npm website 

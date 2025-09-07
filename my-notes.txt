@@ -1,0 +1,8 @@
+First of all go to .gitignore
+1. remove '/' from node_modules because apparrently when pushing to git it will push node modules inside backend also.
+
+To run both index.js from backend and front end react application 
+1. install concurrently from npm
+2. go to source inside package.json
+3. add this => "both": "concurrently \"npm run start\" \"nodemon backend/index.js\""
+4. terminal=> npm run both
