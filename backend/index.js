@@ -1,30 +1,41 @@
-require('dotenv').config()
+require('dotenv').config();
 const connectToMongo = require('./db');
+const express = require('express');
+var cors = require('cors');
+
+// Connect to MongoDB
 connectToMongo();
-const express = require('express')
-//This is necessary to allow external api to work on the website
-//search 'resolve cors express' go to express website
-var cors = require('cors')
 
-// copy this part from express website
-const app = express()
-const port = 5000 //because react works on 3000
+const app = express();
+const port = process.env.PORT || 5000; // Use environment variable or default to 5000
 
-//This is necessary to resolve cors
-app.use(cors())
+// Middleware to resolve CORS (Cross-Origin Resource Sharing)
+app.use(cors());
 
-
-// This middleware is necessary to send req.body
+// Middleware to parse JSON in request bodies
 app.use(express.json());
 
-// available routes
-app.use('/api/auth',require('./routes/auth.js'))
-app.use('/api/notes',require('./routes/notes.js'))
+// -----------------------------------------------------------------------
+// AVAILABLE ROUTES
+// -----------------------------------------------------------------------
 
+// 1. Candidate Authentication Routes (Signup/Login for Job Seekers)
+app.use('/api/auth/candidate', require('./routes/candidateAuth'));
+
+// 2. Employer Authentication Routes (Signup/Login for Companies)
+app.use('/api/auth/employer', require('./routes/employerAuth'));
+
+// 3. Job Routes (Replaces the old notes.js)
+// Note: You will need to create 'routes/jobs.js' later to handle job postings
+app.use('/api/jobs', require('./routes/jobs.js')); 
+
+
+// Root endpoint for testing
 app.get('/', (req, res) => {
-  res.send('Hello Pramod Gole!')
-})
+  res.send('Job Portal Backend is Running - Welcome Pramod Gole!');
+});
 
+// Start the server
 app.listen(port, () => {
-  console.log(`iNoteBook is listening at http://localhost:${port}`)
-})
+  console.log(`Job Portal Backend listening at http://localhost:${port}`);
+});

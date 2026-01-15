@@ -17,6 +17,12 @@ const UserSchema = new Schema({
     type: String,
     required: true
   },
+  role: {
+    type: String,
+    required: true,
+    enum: ['candidate', 'employer'], // Only these two values are allowed
+    default: 'candidate'
+  },
   date: {
     type: Date,
     default: Date.now
