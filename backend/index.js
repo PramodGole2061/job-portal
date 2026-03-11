@@ -1,13 +1,18 @@
-require('dotenv').config();
-const connectToMongo = require('./db');
-const express = require('express');
-var cors = require('cors');
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors'
 
-// Connect to MongoDB
+import connectToMongo from './middleware/db.js';
+import candidateAuthRoutes from './routes/candidateAuth.js';
+import employeeAuthRoutes from './routes/employerAuth.js';
+import jobRoutes from './routes/jobs.js';
+
 connectToMongo();
 
+dotenv.config();
+
 const app = express();
-const port = process.env.PORT || 5000; // Use environment variable or default to 5000
+const port = process.env.PORT;
 
 // Middleware to resolve CORS (Cross-Origin Resource Sharing)
 app.use(cors());
@@ -15,24 +20,19 @@ app.use(cors());
 // Middleware to parse JSON in request bodies
 app.use(express.json());
 
-// -----------------------------------------------------------------------
-// AVAILABLE ROUTES
-// -----------------------------------------------------------------------
+// ROUTES
+// Candidate Authentication Routes
+app.use('/api/auth/candidate', candidateAuthRoutes);
 
-// 1. Candidate Authentication Routes (Signup/Login for Job Seekers)
-app.use('/api/auth/candidate', require('./routes/candidateAuth'));
+// Employer Authentication Routes
+app.use('/api/auth/employer', employeeAuthRoutes);
 
-// 2. Employer Authentication Routes (Signup/Login for Companies)
-app.use('/api/auth/employer', require('./routes/employerAuth'));
-
-// 3. Job Routes (Replaces the old notes.js)
-// Note: You will need to create 'routes/jobs.js' later to handle job postings
-app.use('/api/jobs', require('./routes/jobs.js')); 
+// Job Routes
+app.use('/api/jobs', jobRoutes); 
 
 
-// Root endpoint for testing
 app.get('/', (req, res) => {
-  res.send('Job Portal Backend is Running - Welcome Pramod Gole!');
+  res.send('Job Portal Backend is Running.');
 });
 
 // Start the server

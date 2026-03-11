@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const mongoURI = "mongodb://localhost:27017/iNoteBook";
+const mongoURI = "mongodb://localhost:27017/job-portal"
 
 const connectToMongo = ()=>{
     try{
@@ -12,4 +12,4 @@ const connectToMongo = ()=>{
 
 }
 
-module.exports = connectToMongo;
+export default connectToMongo;

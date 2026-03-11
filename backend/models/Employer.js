@@ -1,5 +1,7 @@
-const { type } = require('@testing-library/user-event/dist/type');
-const mongoose = require('mongoose');
+import { strict } from "assert";
+import mongoose from "mongoose";
+import { type } from "os";
+
 const { Schema } = mongoose;
 
 const EmployerSchema = new Schema({
@@ -17,4 +19,5 @@ const EmployerSchema = new Schema({
     date: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('employer', EmployerSchema);
+const Employer = mongoose.model('Employer', EmployerSchema);
+export default Employer;
