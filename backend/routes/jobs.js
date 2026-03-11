@@ -17,10 +17,10 @@ router.post('/addjob', verifyUser, [
 ], addjob);
 
 // ROUTE 3: Update an existing Job (Login Required)
-router.put('/updatejob/:id', verifyUser, updatejob);
+router.put('/updatejob/:postId/:employerId', verifyUser, updatejob);
 
 // ROUTE 4: Delete a Job (Login Required)
-router.delete('/deletejob/:id', verifyUser, deletejob);
+router.delete('/deletejob/:postId/:employerId', verifyUser, deletejob);
 
 
 export default router;

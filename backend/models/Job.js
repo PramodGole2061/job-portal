@@ -38,6 +38,11 @@ const JobSchema = new Schema({
         type: Date,
         default: Date.now
     },
+    slug: {
+        type: String,
+        required: true,
+        unique: true
+    }
 });
 
 const Job = mongoose.model('Job', JobSchema);

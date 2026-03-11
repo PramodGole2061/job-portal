@@ -1,10 +1,9 @@
 import jwt from 'jsonwebtoken';
-const JWT_SECRET = process.env.JWT_SECRET;
 
 const verifyUser = (req, res, next) => {
     const token = req.header('auth-token');
 
-    if (!JWT_SECRET) {
+    if (!process.env.JWT_SECRET) {
         console.error("CRITICAL ERROR: JWT_SECRET is not defined in .env file.");
         return res.status(500).json({ success: false, error: "Internal Server Configuration Error." });
     }
@@ -17,7 +16,7 @@ const verifyUser = (req, res, next) => {
     }
 
     try {
-        const data = jwt.verify(token, JWT_SECRET);
+        const data = jwt.verify(token, process.env.JWT_SECRET);
 
         // Check if the expected data structure exists in the token
         if (!data.user || !data.user.id || !data.user.role) {

@@ -4,9 +4,8 @@ import Candidate from '../models/Candidate.js';
 
 import { body, validationResult } from 'express-validator';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
 export const register = async (req, res) =>{
+    console.log("Register request received for:", req.body.email)
     let success = false;
     
     const errors = validationResult(req);
@@ -41,7 +40,7 @@ export const register = async (req, res) =>{
             }
         };
 
-        const token = jwt.sign(data, JWT_SECRET);
+        const token = jwt.sign(data, process.env.JWT_SECRET);
         success = true;
         
         res.json({ success, token, role: 'candidate' });
@@ -80,7 +79,7 @@ export const login = async(req, res)=>{
             }
         };
 
-        const token = jwt.sign(data, JWT_SECRET);
+        const token = jwt.sign(data, process.env.JWT_SECRET);
         success = true;
         res.json({ success, token, role: 'candidate' });
 
@@ -102,11 +101,15 @@ export const getcandidates = async (req, res) => {
 }
 
 export const updateCandidate = async (req, res) => {
-    const { firstName, lastName, email, contactNumber, jobPreference } = req.body;
+    if(req.params.userId !== req.user.id){
+        return res.status(401).json("You are not authorized to update the user!");
+    }
+    const { firstName, lastName, email, password, contactNumber, jobPreference } = req.body;
     try {
         const newCandidate = {};
         if (firstName) newCandidate.firstName = firstName;
         if (lastName) newCandidate.lastName = lastName;
+        if(password) newCandidate.password = password;
         if (contactNumber) newCandidate.contactNumber = contactNumber;
         if (jobPreference) newCandidate.jobPreference = jobPreference;
 
@@ -131,6 +134,9 @@ export const updateCandidate = async (req, res) => {
 }
 
 export const deleteCandidate = async (req, res) => {
+    if(req.params.userId !== req.user.id){
+        return res.status(401).json("You are not authorized to delete the user!");
+    }
     try {
         let candidate = await Candidate.findById(req.user.id);
         if (!candidate) return res.status(404).json({ success: false, error: "User not found" });

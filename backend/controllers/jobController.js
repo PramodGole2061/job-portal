@@ -28,12 +28,15 @@ export const addjob = async (req, res) => {
 
         const { title, company, description, location, salary } = req.body;
         
+        const slug = req.body.title.split(' ').join('-').toLowerCase().replace(/[^a-zA-Z0-9]/g, '-')
+
         const job = new Job({
             title, 
             company, 
             description, 
             location, 
             salary,
+            slug,
             employer: req.user.id
         });
 
@@ -48,11 +51,20 @@ export const addjob = async (req, res) => {
 
 
 export const updatejob = async (req, res) => {
+    if(req.params.employerId !== req.user.id){
+        return res.status(401).json("You are not authorized to update this job!");
+    }
+
     const { title, description, location, salary, company } = req.body;
 
     try {
         if (req.user.role !== 'employer') {
             return res.status(403).json({ success: false, error: "Only employers can update jobs." });
+        }
+
+        let slug;
+        if (req.body.title) {
+            slug = req.body.title.split(' ').join('-').toLowerCase().replace(/[^a-zA-Z0-9]/g, '-');
         }
 
         const newJob = {};
@@ -62,7 +74,7 @@ export const updatejob = async (req, res) => {
         if (salary) newJob.salary = salary;
         if (company) newJob.company = company;
 
-        let job = await Job.findById(req.params.id);
+        let job = await Job.findById(req.params.postId);
         
         if (!job) { 
             return res.status(404).json({ success: false, error: "Job Not Found" });
@@ -76,7 +88,7 @@ export const updatejob = async (req, res) => {
             return res.status(401).json({ success: false, error: "Not Allowed: This is not your job post." });
         }
 
-        job = await Job.findByIdAndUpdate(req.params.id, { $set: newJob }, { new: true });
+        job = await Job.findByIdAndUpdate(req.params.postId, { $set: newJob, ...(slug && { slug })  }, { new: true });
         res.json({ success: true, job });
 
     } catch (error) {
@@ -86,19 +98,22 @@ export const updatejob = async (req, res) => {
 }
 
 export const deletejob = async (req, res) => {
+    if(req.params.employerId !== req.user.id){
+        return res.status(401).json("You are not authorized to delete this job!");
+    }
     try {
         if (req.user.role !== 'employer') {
             return res.status(403).json({ success: false, error: "Forbidden: Only employers can delete jobs." });
         }
 
-        let job = await Job.findById(req.params.id);
+        let job = await Job.findById(req.params.postId);
         if (!job) { return res.status(404).json({ success: false, error: "Job Not Found" }) }
 
         if (job.employer.toString() !== req.user.id) {
             return res.status(401).json({ success: false, error: "Not Allowed: You can only delete your own job posts." });
         }
 
-        await Job.findByIdAndDelete(req.params.id);
+        await Job.findByIdAndDelete(req.params.postId);
         res.json({ success: true, message: "Job has been deleted successfully" });
 
     } catch (error) {

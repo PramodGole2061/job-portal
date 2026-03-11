@@ -15,13 +15,6 @@ router.post('/register', [
     body('contactNumber', 'Contact number is required').notEmpty(),
     body('jobPreference', 'Please select a job preference').notEmpty(),
 
-    body('retypeEmail').custom((value, { req }) => {
-        if (value !== req.body.email) {
-            throw new Error('Email confirmation does not match email');
-        }
-        return true;
-    }),
-
     body('retypePassword').custom((value, { req }) => {
         if (value !== req.body.password) {
             throw new Error('Password confirmation does not match password');
@@ -41,9 +34,9 @@ router.post('/getcandidates', verifyUser, getcandidates);
 
 
 // ROUTE 4: Update Candidate Profile Login Required
-router.put('/update', verifyUser, updateCandidate);
+router.put('/update/:userId', verifyUser, updateCandidate);
 
 // ROUTE 5: Delete Candidate Account (Login Required)
-router.delete('/delete', verifyUser, deleteCandidate);
+router.delete('/delete/:userId', verifyUser, deleteCandidate);
 
 export default router;

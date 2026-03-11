@@ -19,12 +19,6 @@ router.post('/register', [
     body('contactPersonMobile', 'Contact person mobile is required').notEmpty(),
     body('contactPersonEmail', 'Enter a valid contact person email').isEmail(),
 
-    body('retypeEmail').custom((value, { req }) => {
-        if (value !== req.body.email) {
-            throw new Error('Email confirmation does not match email');
-        }
-        return true;
-    }),
 
     body('retypePassword').custom((value, { req }) => {
         if (value !== req.body.password) {
@@ -45,9 +39,9 @@ router.post('/login', [
 router.post('/getuser', verifyUser, getuser);
 
 // ROUTE 4: Update All Fields (Login Required)
-router.put('/update', verifyUser, updateUser);
+router.put('/update/:employerId', verifyUser, updateUser);
 
 // ROUTE 5: Delete Account (Login Required)
-router.delete('/delete', verifyUser, deleteUser);
+router.delete('/delete/:employerId', verifyUser, deleteUser);
 
 export default router;

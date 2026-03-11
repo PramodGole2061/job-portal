@@ -4,8 +4,6 @@ import Employer from '../models/Employer.js';
 
 import { body, validationResult } from 'express-validator';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
 export const register = async (req, res) => {
     let success = false;
     
@@ -44,7 +42,7 @@ export const register = async (req, res) => {
             }
         };
 
-        const token = jwt.sign(data, JWT_SECRET);
+        const token = jwt.sign(data, process.env.JWT_SECRET);
         success = true;
         
         res.json({ success, token, role: 'employer' });
@@ -82,7 +80,7 @@ export const login = async (req, res) => {
             }
         };
 
-        const token = jwt.sign(data, JWT_SECRET);
+        const token = jwt.sign(data, process.env.JWT_SECRET);
         success = true;
         res.json({ success, token, role: 'employer' });
 
@@ -103,8 +101,9 @@ export const getuser = async (req, res) => {
 }
 
 export const updateUser =  async (req, res) => {
-    console.log("PUT /employer/update hit for user:", req.user.id);
-    
+    if(req.params.employerId !== req.user.id){
+        return res.status(401).json("You are not authorized to update this account!");
+    }    
     const { 
         companyName, email, primaryPhone, industry, city, location, 
         contactPersonName, contactPersonMobile, contactPersonEmail 
@@ -142,6 +141,10 @@ export const updateUser =  async (req, res) => {
 }
 
 export const deleteUser = async (req, res) => {
+    if(req.params.employerId !== req.user.id){
+        return res.status(401).json("You are not authorized to delete this account!");
+    }
+
     try {
         let employer = await Employer.findById(req.user.id);
         if (!employer) return res.status(404).json({ success: false, error: "Company not found" });
