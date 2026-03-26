@@ -1,0 +1,738 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Sajilo Jobs API",
+    "description": "Comprehensive RESTful API documentation for the Sajilo Jobs Job Portal System.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Pramod Gole",
+      "email": "golepramod72@gmail.com"
+    }
+  },
+  "servers":[
+    {
+      "url": "http://localhost:5000",
+      "description": "Local Development Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "auth-token": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "auth-token",
+        "description": "JWT Authorization header. Example: 'eyJhbGciOiJIUzI1NiIs...'"
+      }
+    }
+  },
+  "security": [
+    {
+      "auth-token": []
+    }
+  ],
+  "paths": {
+  "/api/auth/candidate/register": {
+    "post": {
+      "summary": "Register a new Candidate",
+      "description": "Creates a new job seeker account.",
+      "tags": ["Candidate Authentication"],
+      "security":[],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required":["firstName", "lastName", "email", "password", "retypePassword", "contactNumber", "jobPreference"],
+              "properties": {
+                "firstName": { "type": "string", "example": "pramod" },
+                "lastName": { "type": "string", "example": "gole" },
+                "email": { "type": "string", "format": "email", "example": "pramod@gamil.com" },
+                "password": { "type": "string", "format": "password", "example": "pramod@123" },
+                "retypePassword": { "type": "string", "format": "password", "example": "pramod@123" },
+                "contactNumber": { "type": "string", "example": "9800000000" },
+                "jobPreference": { "type": "string", "example": "Software Engineer" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Candidate registered successfully. Returns a JWT token." },
+        "400": { "description": "Validation errors or email already exists." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/candidate/login": {
+    "post": {
+      "summary": "Candidate Login",
+      "description": "Authenticates a candidate and returns a JWT token.",
+      "tags": ["Candidate Authentication"],
+      "security":[],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["email", "password"],
+              "properties": {
+                "email": { "type": "string", "format": "email", "example": "pramod@gamil.com" },
+                "password": { "type": "string", "format": "password", "example": "pramod@123" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Login successful. Returns JWT token." },
+        "400": { "description": "Invalid login credentials." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/candidate/getcandidates": {
+    "post": {
+      "summary": "Get Logged-in Candidate Details",
+      "description": "Retrieves the profile details of the currently authenticated candidate.",
+      "tags": ["Candidate Authentication"],
+      "security": [
+        { "auth-token": [] }
+      ],
+      "responses": {
+        "200": { "description": "Candidate details retrieved successfully." },
+        "401": { "description": "Authentication Failed. Access Denied." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/candidate/update/{userId}": {
+    "put": {
+      "summary": "Update Candidate Profile",
+      "description": "Updates profile details for a specified candidate account.",
+      "tags": ["Candidate Authentication"],
+      "security": [
+        { "auth-token": [] }
+      ],
+      "parameters":[
+        {
+          "name": "userId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The ID of the candidate to update."
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "firstName": { "type": "string" },
+                "lastName": { "type": "string" },
+                "email": { "type": "string", "format": "email" },
+                "password": { "type": "string", "format": "password" },
+                "contactNumber": { "type": "string" },
+                "jobPreference": { "type": "string" },
+                "skills": { 
+                  "type": "array", 
+                  "items": { "type": "string" } 
+                },
+                "education": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "degree": { "type": "string" },
+                      "institution": { "type": "string" },
+                      "passingYear": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Profile updated successfully." },
+        "400": { "description": "Email is already in use by another account." },
+        "401": { "description": "Not authorized to update this user." },
+        "404": { "description": "User not found." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/candidate/change-password": {
+    "put": {
+      "summary": "Change Candidate Password",
+      "description": "Allows a logged-in candidate to change their password.",
+      "tags": ["Candidate Authentication"],
+      "security":[
+        { "auth-token": [] }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["oldPassword", "newPassword"],
+              "properties": {
+                "oldPassword": { "type": "string", "format": "password" },
+                "newPassword": { "type": "string", "format": "password" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Password has been changed successfully!" },
+        "400": { "description": "Incorrect old password." },
+        "403": { "description": "Access denied. Only candidates can perform this action." },
+        "404": { "description": "User not found." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/candidate/delete/{userId}": {
+    "delete": {
+      "summary": "Delete Candidate Account",
+      "description": "Deletes the candidate account along with all physical resume files and applications.",
+      "tags": ["Candidate Authentication"],
+      "security": [
+        { "auth-token": [] }
+      ],
+      "parameters":[
+        {
+          "name": "userId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The ID of the candidate to delete."
+        }
+      ],
+      "responses": {
+        "200": { "description": "Candidate account has been deleted." },
+        "401": { "description": "Not authorized to delete this user." },
+        "404": { "description": "User not found." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/candidate/save-job/{jobId}": {
+    "post": {
+      "summary": "Toggle Save/Unsave Job",
+      "description": "Saves a job to the candidate's profile, or removes it if it is already saved.",
+      "tags": ["Candidate Authentication"],
+      "security": [
+        { "auth-token": [] }
+      ],
+      "parameters":[
+        {
+          "name": "jobId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The ID of the job to save or unsave."
+        }
+      ],
+      "responses": {
+        "200": { "description": "Job saved successfully OR Job removed from saved list." },
+        "403": { "description": "Only candidates can save jobs." },
+        "404": { "description": "Job not found." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/candidate/saved-jobs": {
+    "get": {
+      "summary": "Get Saved Jobs",
+      "description": "Retrieves a list of all jobs saved by the authenticated candidate.",
+      "tags": ["Candidate Authentication"],
+      "security":[
+        { "auth-token": [] }
+      ],
+      "responses": {
+        "200": { "description": "Returns an array of saved job objects." },
+        "403": { "description": "Only candidates can view saved jobs." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/employer/register": {
+    "post": {
+      "summary": "Register a new Company/Employer",
+      "description": "Creates a new employer account to post jobs and manage applications.",
+      "tags": ["Employer Authentication"],
+      "security":[],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required":[
+                "companyName", 
+                "email", 
+                "password", 
+                "retypePassword", 
+                "primaryPhone", 
+                "industry", 
+                "city", 
+                "location", 
+                "contactPersonName", 
+                "contactPersonMobile", 
+                "contactPersonEmail"
+              ],
+              "properties": {
+                "companyName": { "type": "string", "example": "Tech Solutions Inc." },
+                "email": { "type": "string", "format": "email", "example": "hr@techsolutions.com" },
+                "password": { "type": "string", "format": "password", "example": "securepass123" },
+                "retypePassword": { "type": "string", "format": "password", "example": "securepass123" },
+                "primaryPhone": { "type": "string", "example": "981274657" },
+                "industry": { "type": "string", "example": "Information Technology" },
+                "city": { "type": "string", "example": "Kathmandu" },
+                "location": { "type": "string", "example": "Baneshwor, Kathmandu" },
+                "contactPersonName": { "type": "string", "example": "Ram" },
+                "contactPersonMobile": { "type": "string", "example": "982475375" },
+                "contactPersonEmail": { "type": "string", "format": "email", "example": "ram@gmail.com" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Employer registered successfully. Returns a JWT token." },
+        "400": { "description": "Validation errors or email already registered to another company." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/employer/login": {
+    "post": {
+      "summary": "Employer Login",
+      "description": "Authenticates an employer and returns a JWT token.",
+      "tags": ["Employer Authentication"],
+      "security":[],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["email", "password"],
+              "properties": {
+                "email": { "type": "string", "format": "email", "example": "hr@techsolutions.com" },
+                "password": { "type": "string", "format": "password", "example": "securepass123" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Login successful. Returns JWT token." },
+        "400": { "description": "Invalid login credentials." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/employer/getuser": {
+    "post": {
+      "summary": "Get Logged-in Employer Details",
+      "description": "Retrieves the company details of the currently authenticated employer.",
+      "tags": ["Employer Authentication"],
+      "security": [
+        { "auth-token": [] }
+      ],
+      "responses": {
+        "200": { "description": "Company details retrieved successfully (password excluded)." },
+        "401": { "description": "Authentication Failed. Access Denied." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/employer/update/{employerId}": {
+    "put": {
+      "summary": "Update Employer Profile",
+      "description": "Updates company or contact person details for a specified employer account.",
+      "tags": ["Employer Authentication"],
+      "security":[
+        { "auth-token": [] }
+      ],
+      "parameters":[
+        {
+          "name": "employerId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The ID of the employer to update."
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "companyName": { "type": "string" },
+                "email": { "type": "string", "format": "email" },
+                "primaryPhone": { "type": "string" },
+                "industry": { "type": "string" },
+                "city": { "type": "string" },
+                "location": { "type": "string" },
+                "contactPersonName": { "type": "string" },
+                "contactPersonMobile": { "type": "string" },
+                "contactPersonEmail": { "type": "string", "format": "email" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Company profile updated successfully." },
+        "400": { "description": "Email is already taken by another company." },
+        "401": { "description": "Not authorized to update this account." },
+        "404": { "description": "Company not found." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/auth/employer/delete/{employerId}": {
+    "delete": {
+      "summary": "Delete Employer Account",
+      "description": "Permanently deletes the employer account from the system.",
+      "tags":["Employer Authentication"],
+      "security": [
+        { "auth-token": [] }
+      ],
+      "parameters":[
+        {
+          "name": "employerId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The ID of the employer to delete."
+        }
+      ],
+      "responses": {
+        "200": { "description": "Company account deleted successfully." },
+        "401": { "description": "Not authorized to delete this account." },
+        "404": { "description": "Company not found." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+
+
+  "/api/jobs/fetchalljobs": {
+    "get": {
+      "summary": "Fetch and Search All Jobs",
+      "description": "Retrieves a list of active job postings. Supports advanced searching, filtering, sorting, and pagination.",
+      "tags": ["Jobs"],
+      "security":[],
+      "parameters":[
+        { "name": "keyword", "in": "query", "schema": { "type": "string" }, "description": "Search by job title, description, or company name." },
+        { "name": "location", "in": "query", "schema": { "type": "string" }, "description": "Filter jobs by location." },
+        { "name": "company", "in": "query", "schema": { "type": "string" }, "description": "Filter jobs by a specific company name." },
+        { "name": "category", "in": "query", "schema": { "type": "string" }, "description": "Filter jobs by category." },
+        { "name": "startIndex", "in": "query", "schema": { "type": "integer", "default": 0 }, "description": "Pagination start index." },
+        { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 9 }, "description": "Number of jobs to return per page." },
+        { "name": "order", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" }, "description": "Sort order based on posting date." }
+      ],
+      "responses": {
+        "200": { 
+          "description": "List of jobs returned successfully.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": { "type": "boolean", "example": true },
+                  "count": { "type": "integer", "example": 9 },
+                  "totalJobs": { "type": "integer", "example": 45 },
+                  "jobs": { "type": "array", "items": { "type": "object" } }
+                }
+              }
+            }
+          }
+        },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/jobs/addjob": {
+    "post": {
+      "summary": "Create a New Job",
+      "description": "Allows an authenticated employer to post a new job listing.",
+      "tags": ["Jobs"],
+      "security":[
+        { "auth-token": [] }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required":["title", "company", "description", "location", "applicationDeadline"],
+              "properties": {
+                "title": { "type": "string", "minLength": 3, "example": "Senior Frontend Developer" },
+                "company": { "type": "string", "example": "Tech Solutions Inc." },
+                "description": { "type": "string", "minLength": 10, "example": "We are looking for an experienced frontend developer proficient in React..." },
+                "location": { "type": "string", "example": "Kathmandu, Nepal" },
+                "salary": { "type": "string", "example": "Rs. 80,000 - 1,20,000 / month" },
+                "category": { "type": "string", "example": "Information Technology" },
+                "applicationDeadline": { "type": "string", "format": "date", "example": "2026-04-30" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Job created successfully." },
+        "400": { "description": "Validation errors (e.g., title or description too short)." },
+        "403": { "description": "Forbidden. Only employers can post jobs." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/jobs/updatejob/{postId}/{employerId}": {
+    "put": {
+      "summary": "Update an Existing Job",
+      "description": "Allows the employer who created the job to update its details.",
+      "tags": ["Jobs"],
+      "security":[
+        { "auth-token": [] }
+      ],
+      "parameters":[
+        {
+          "name": "postId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The ID of the job post to update."
+        },
+        {
+          "name": "employerId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The ID of the employer making the request."
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "company": { "type": "string" },
+                "description": { "type": "string" },
+                "location": { "type": "string" },
+                "salary": { "type": "string" },
+                "category": { "type": "string" },
+                "applicationDeadline": { "type": "string", "format": "date" }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Job updated successfully." },
+        "401": { "description": "Not Allowed. Only the owner can update this job." },
+        "403": { "description": "Forbidden. Only employers can update jobs." },
+        "404": { "description": "Job Not Found." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/jobs/deletejob/{postId}/{employerId}": {
+    "delete": {
+      "summary": "Delete a Job",
+      "description": "Deletes a job post. Also removes all associated candidate applications and physical resume files submitted for this job.",
+      "tags": ["Jobs"],
+      "security": [
+        { "auth-token": [] }
+      ],
+      "parameters":[
+        {
+          "name": "postId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The ID of the job post to delete."
+        },
+        {
+          "name": "employerId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The ID of the employer making the request."
+        }
+      ],
+      "responses": {
+        "200": { "description": "Job and associated applications deleted successfully." },
+        "401": { "description": "Not Allowed. You can only delete your own job posts." },
+        "403": { "description": "Forbidden. Only employers can delete jobs." },
+        "404": { "description": "Job Not Found." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+
+
+  "/api/applications/apply/{jobId}": {
+    "post": {
+      "summary": "Apply for a Job & Upload Resume",
+      "description": "Allows an authenticated candidate to apply for a job post. Requires uploading a resume file (PDF, DOC, or DOCX up to 5MB).",
+      "tags": ["Applications"],
+      "security": [
+        { "auth-token": [] }
+      ],
+      "parameters":[
+        {
+          "name": "jobId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The unique ID of the job being applied for."
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "required": ["resume"],
+              "properties": {
+                "resume": {
+                  "type": "string",
+                  "format": "binary",
+                  "description": "Upload candidate's resume/CV. Allowed formats: application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Application submitted successfully." },
+        "400": { "description": "Bad Request. Possible reasons: Deadline passed, already applied for this job, missing resume file, or invalid file type." },
+        "403": { "description": "Forbidden. Only candidates can apply for jobs." },
+        "404": { "description": "Job not found." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/applications/candidate-applications": {
+    "get": {
+      "summary": "Get Candidate's Applications",
+      "description": "Retrieves a list of all job applications submitted by the logged-in candidate, including job details.",
+      "tags": ["Applications"],
+      "security": [
+        { "auth-token": [] }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successfully retrieved list of applications.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": { "type": "boolean", "example": true },
+                  "applications": { "type": "array", "items": { "type": "object" } }
+                }
+              }
+            }
+          }
+        },
+        "403": { "description": "Access denied. Only candidates can view this." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/applications/employer-applications": {
+    "get": {
+      "summary": "Get Employer's Job Applications",
+      "description": "Retrieves a list of all applications received by the logged-in employer for their job postings. Populates candidate and job details.",
+      "tags": ["Applications"],
+      "security": [
+        { "auth-token": [] }
+      ],
+      "responses": {
+        "200": {
+          "description": "Successfully retrieved list of applications.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": { "type": "boolean", "example": true },
+                  "applications": { "type": "array", "items": { "type": "object" } }
+                }
+              }
+            }
+          }
+        },
+        "403": { "description": "Access denied. Only employers can view this." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  },
+  "/api/applications/update-status/{applicationId}": {
+    "put": {
+      "summary": "Update Application Status",
+      "description": "Allows an employer to update the tracking status of a specific candidate application (e.g., Pending, Reviewed, Shortlisted, Rejected).",
+      "tags": ["Applications"],
+      "security":[
+        { "auth-token": [] }
+      ],
+      "parameters":[
+        {
+          "name": "applicationId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "The unique ID of the application to update."
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required":["status"],
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": ["Pending", "Reviewed", "Shortlisted", "Rejected"],
+                  "example": "Shortlisted",
+                  "description": "The new status for the job application."
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Application status updated successfully." },
+        "400": { "description": "Invalid status value provided." },
+        "401": { "description": "Not authorized to update this specific application (not the owner)." },
+        "403": { "description": "Access denied. Only employers can update status." },
+        "404": { "description": "Application not found." },
+        "500": { "description": "Internal Server Error." }
+      }
+    }
+  }
+}
+}

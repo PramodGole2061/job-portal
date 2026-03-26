@@ -1,3 +1,5 @@
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors'
@@ -10,6 +12,9 @@ import employeeAuthRoutes from './routes/employerAuth.js';
 import jobRoutes from './routes/jobs.js';
 import applicationRoutes from './routes/applications.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
+
+// load the swagger documentation file
+const swaggerDocument = JSON.parse(fs.readFileSync('./swagger.json', 'utf-8'));
 
 connectToMongo();
 
@@ -32,6 +37,9 @@ app.use(cors());
 app.use(express.json());
 
 // ROUTES
+// swagger documentation route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 // Candidate Authentication Routes
 app.use('/api/auth/candidate', candidateAuthRoutes);
 
