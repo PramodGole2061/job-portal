@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Candidate from '../models/Candidate.js';
+import Job from '../models/Job.js';
 
 import { body, validationResult } from 'express-validator';
 
@@ -162,3 +163,55 @@ export const deleteCandidate = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 }
+
+export const toggleSaveJob = async (req, res) => {
+    try {
+        if(req.user.role !== 'candidate'){
+            return res.status(403).json({ success: false, error: "Only candidates can save jobs."});
+        }
+
+        const jobId = req.params.jobId;
+
+        const job = await Job.findById(jobId);
+        if (!job) {
+            return res.status(404).json({ success: false, error: "Job not found." });
+        }
+
+        const candidate = await Candidate.findById(req.user.id);
+
+        const isSaved = candidate.savedJobs.includes(jobId);
+
+        if (isSaved) {
+            await Candidate.findByIdAndUpdate(req.user.id, {$pull: { savedJobs: jobId }
+            });
+            return res.json({ success: true, message: "Job removed from saved list." });
+        } else {
+            await Candidate.findByIdAndUpdate(req.user.id, {$push: { savedJobs: jobId }
+            });
+            return res.json({ success: true, message: "Job saved successfully!" });
+        }
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+export const getSavedJobs = async (req, res) => {
+    try {
+        if (req.user.role !== 'candidate') {
+            return res.status(403).json({ success: false, error: "Only candidates can view saved jobs." });
+        }
+
+        const candidate = await Candidate.findById(req.user.id).populate({
+            path: 'savedJobs',
+            select: 'title company location salary category applicationDeadline'
+        });
+
+        res.json({success: true, count: candidate.savedJobs.length, savedJobs: candidate.savedJobs});
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("Internal Server Error");
+    }
+};

@@ -41,6 +41,12 @@ const CandidateSchema = new Schema({
             passingYear: { type: String, required: true }
         }
     ],
+    savedJobs:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Job'
+        }
+    ],
     role: { 
         type: String,
          default: 'candidate'

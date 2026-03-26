@@ -2,11 +2,11 @@ import express from 'express';
 import {body, validationResult} from 'express-validator';
 
 import verifyUser from '../middleware/verifyUser.js';
-import {register, login, getcandidates, updateCandidate, deleteCandidate} from '../controllers/candidateAuthController.js';
+import {register, login, getcandidates, updateCandidate, deleteCandidate, toggleSaveJob, getSavedJobs} from '../controllers/candidateAuthController.js';
 
 const router = express.Router();
 
-// ROUTE 1: Register a Job Seeker
+// ROUTE 1: register a Job Seeker
 router.post('/register', [
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password must be at least 5 characters long').isLength({ min: 5 }),
@@ -23,20 +23,26 @@ router.post('/register', [
     })
 ], register);
 
-// ROUTE 2: Login for Job Seeker
+// ROUTE 2: login for Job Seeker
 router.post('/login', [
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password cannot be empty').exists()
 ], login);
 
-// ROUTE 3: Get Logged-in Candidate Details (Login Required)
+// ROUTE 3: get logged-in candidate details 
 router.post('/getcandidates', verifyUser, getcandidates);
 
 
-// ROUTE 4: Update Candidate Profile (Login Required)
+// ROUTE 4: update candidate profile 
 router.put('/update/:userId', verifyUser, updateCandidate);
 
-// ROUTE 5: Delete Candidate Account (Login Required)
+// ROUTE 5: delete candidate account 
 router.delete('/delete/:userId', verifyUser, deleteCandidate);
+
+// ROUTE 6: toggle save/unsave job 
+router.post('/save-job/:jobId', verifyUser, toggleSaveJob);
+
+// ROUTE 7: get all saved jobs for candidate 
+router.get('/saved-jobs', verifyUser, getSavedJobs);
 
 export default router;
