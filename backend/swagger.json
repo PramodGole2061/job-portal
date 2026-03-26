@@ -21,7 +21,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "auth-token",
-        "description": "JWT Authorization header. Example: 'eyJhbGciOiJIUzI1NiIs...'"
+        "description": "JWT Authorization header.'"
       }
     }
   },
