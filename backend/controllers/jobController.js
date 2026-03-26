@@ -3,8 +3,34 @@ import {body, validationResult} from 'express-validator';
 
 export const fetchalljobs = async (req, res) => {
     try {
-        const jobs = await Job.find();
-        res.json({ success: true, jobs });
+        const {keyword, location, company, category} = req.query;
+        
+        let query = {};
+
+        if (keyword) {
+            query.$or =[
+                { title: { $regex: keyword, $options: 'i' } },
+                { description: { $regex: keyword, $options: 'i' } },
+                { company: { $regex: keyword, $options: 'i' } }
+            ];
+        }
+
+        if (location) {
+            query.location = { $regex: location, $options: 'i' };
+        }
+
+        if (company) {
+            query.company = { $regex: company, $options: 'i' };
+        }
+
+         if (category) {
+            query.category = { $regex: category, $options: 'i' };
+        }
+
+        const jobs = await Job.find(query).sort({ date: -1 });
+
+        res.json({success: true, count: jobs.length, jobs});
+
     } catch (error) {
         console.error(error.message);
         res.status(500).send("Internal Server Error");

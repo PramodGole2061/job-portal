@@ -30,6 +30,10 @@ const JobSchema = new Schema({
         type: String,
         required: true
     },
+    category: {
+        type: String,
+        default: "General" 
+    },
     salary: {
         type: String,
         default: "Not Disclosed"
