@@ -5,33 +5,39 @@ export const fetchalljobs = async (req, res) => {
     try {
         const {keyword, location, company, category} = req.query;
         
+        const startIndex = parseInt(req.query.startIndex) || 0;
+        const limit = parseInt(req.query.limit) || 9;
+        const sortDirection = req.query.order === 'asc' ? 1 : -1;
+
         let query = {};
 
-        if (keyword) {
+        if(keyword){
             query.$or =[
-                { title: { $regex: keyword, $options: 'i' } },
-                { description: { $regex: keyword, $options: 'i' } },
-                { company: { $regex: keyword, $options: 'i' } }
+                {title: {$regex: keyword, $options: 'i'}},
+                {description: {$regex: keyword, $options: 'i'}},
+                {company: {$regex: keyword, $options: 'i'}}
             ];
         }
 
-        if (location) {
-            query.location = { $regex: location, $options: 'i' };
+        if(location){
+            query.location = {$regex: location, $options: 'i'};
         }
 
-        if (company) {
-            query.company = { $regex: company, $options: 'i' };
+        if(company){
+            query.company = {$regex: company, $options: 'i'};
         }
 
-         if (category) {
-            query.category = { $regex: category, $options: 'i' };
+         if(category){
+            query.category = {$regex: category, $options: 'i'};
         }
 
-        const jobs = await Job.find(query).sort({ date: -1 });
+        const jobs = await Job.find(query).sort({date: sortDirection}).skip(startIndex).limit(limit);
 
-        res.json({success: true, count: jobs.length, jobs});
+        const totalJobs = await Job.countDocuments(query);
 
-    } catch (error) {
+        res.json({success: true, count: jobs.length,totalJobs,jobs});
+
+    } catch(error){
         console.error(error.message);
         res.status(500).send("Internal Server Error");
     }
