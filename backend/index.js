@@ -1,23 +1,30 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors'
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import connectToMongo from './middleware/db.js';
 import candidateAuthRoutes from './routes/candidateAuth.js';
 import employeeAuthRoutes from './routes/employerAuth.js';
 import jobRoutes from './routes/jobs.js';
+import applicationRoutes from './routes/applications.js';
 
 connectToMongo();
 
 dotenv.config();
 
+//cv upload
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const port = process.env.PORT;
 
-// Middleware to resolve CORS (Cross-Origin Resource Sharing)
+// middleware to resolve CORS 
 app.use(cors());
 
-// Middleware to parse JSON in request bodies
+// middleware to parse JSON in request bodies
 app.use(express.json());
 
 // ROUTES
@@ -30,6 +37,10 @@ app.use('/api/auth/employer', employeeAuthRoutes);
 // Job Routes
 app.use('/api/jobs', jobRoutes); 
 
+//cv upload
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// application routes
+app.use('/api/applications', applicationRoutes);
 
 app.get('/', (req, res) => {
   res.send('Job Portal Backend is Running.');

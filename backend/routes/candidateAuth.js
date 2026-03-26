@@ -33,7 +33,7 @@ router.post('/login', [
 router.post('/getcandidates', verifyUser, getcandidates);
 
 
-// ROUTE 4: Update Candidate Profile Login Required
+// ROUTE 4: Update Candidate Profile (Login Required)
 router.put('/update/:userId', verifyUser, updateCandidate);
 
 // ROUTE 5: Delete Candidate Account (Login Required)
