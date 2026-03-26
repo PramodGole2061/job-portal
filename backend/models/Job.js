@@ -34,6 +34,10 @@ const JobSchema = new Schema({
         type: String,
         default: "General" 
     },
+    applicationDeadline: {
+        type: Date,
+        required: true
+    },
     salary: {
         type: String,
         default: "Not Disclosed"

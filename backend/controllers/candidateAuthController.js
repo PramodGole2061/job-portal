@@ -104,14 +104,23 @@ export const updateCandidate = async (req, res) => {
     if(req.params.userId !== req.user.id){
         return res.status(401).json("You are not authorized to update the user!");
     }
-    const { firstName, lastName, email, password, contactNumber, jobPreference } = req.body;
+    
+    const { firstName, lastName, email, password, contactNumber, jobPreference, skills, education } = req.body;
+    
     try {
         const newCandidate = {};
         if (firstName) newCandidate.firstName = firstName;
         if (lastName) newCandidate.lastName = lastName;
-        if(password) newCandidate.password = password;
+        
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            newCandidate.password = await bcrypt.hash(password, salt);
+        }
+        
         if (contactNumber) newCandidate.contactNumber = contactNumber;
         if (jobPreference) newCandidate.jobPreference = jobPreference;
+        if (skills) newCandidate.skills = skills;
+        if (education) newCandidate.education = education;
 
         if (email) {
             let existingUser = await Candidate.findOne({ email });
@@ -124,8 +133,13 @@ export const updateCandidate = async (req, res) => {
         let candidate = await Candidate.findById(req.user.id);
         if (!candidate) return res.status(404).json({ success: false, error: "User not found" });
 
-        candidate = await Candidate.findByIdAndUpdate(req.user.id, { $set: newCandidate }, { new: true }).select("-password");
-        res.json({ success: true, candidate });
+        candidate = await Candidate.findByIdAndUpdate(
+            req.user.id, 
+            { $set: newCandidate }, 
+            { new: true }
+        ).select("-password");
+
+        res.json({ success: true, message: "Profile updated successfully", candidate });
 
     } catch (error) {
         console.error(error.message);

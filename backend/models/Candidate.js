@@ -30,6 +30,17 @@ const CandidateSchema = new Schema({
         type: String, 
         required: true 
     },
+    skills: {
+        type: [String],
+        default: []
+    },
+    education:[
+        {
+            degree: { type: String, required: true },
+            institution: { type: String, required: true },
+            passingYear: { type: String, required: true }
+        }
+    ],
     role: { 
         type: String,
          default: 'candidate'

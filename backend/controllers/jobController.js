@@ -52,7 +52,7 @@ export const addjob = async (req, res) => {
             return res.status(400).json({ success: false, errors: errors.array() });
         }
 
-        const { title, company, description, location, salary } = req.body;
+        const {title, company, description, location, salary, category, applicationDeadline} = req.body;
         
         const slug = req.body.title.split(' ').join('-').toLowerCase().replace(/[^a-zA-Z0-9]/g, '-')
 
@@ -63,6 +63,8 @@ export const addjob = async (req, res) => {
             location, 
             salary,
             slug,
+            category,
+            applicationDeadline,
             employer: req.user.id
         });
 
@@ -81,7 +83,7 @@ export const updatejob = async (req, res) => {
         return res.status(401).json("You are not authorized to update this job!");
     }
 
-    const { title, description, location, salary, company } = req.body;
+    const {title, description, location, salary, company, category, applicationDeadline} = req.body;
 
     try {
         if (req.user.role !== 'employer') {
@@ -99,6 +101,8 @@ export const updatejob = async (req, res) => {
         if (location) newJob.location = location;
         if (salary) newJob.salary = salary;
         if (company) newJob.company = company;
+        if (category) newJob.category = category;
+        if (applicationDeadline) newJob.applicationDeadline = applicationDeadline;
 
         let job = await Job.findById(req.params.postId);
         
