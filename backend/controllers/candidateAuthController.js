@@ -1,7 +1,10 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import fs from 'fs';
+
 import Candidate from '../models/Candidate.js';
 import Job from '../models/Job.js';
+import Application from '../models/Application.js';
 
 import { body, validationResult } from 'express-validator';
 
@@ -192,6 +195,20 @@ export const deleteCandidate = async (req, res) => {
     try {
         let candidate = await Candidate.findById(req.user.id);
         if (!candidate) return res.status(404).json({ success: false, error: "User not found" });
+
+        // find all applications submitted by this candidate
+        const applications = await Application.find({ candidate: req.user.id });
+
+        // delete the physical PDF files from the server
+        applications.forEach(app => {
+            if (app.resume && fs.existsSync(app.resume)) {
+                // Physically remove the file
+                fs.unlinkSync(app.resume);
+            }
+        });
+
+        // delete all those application records from the database
+        await Application.deleteMany({ candidate: req.user.id });
 
         await Candidate.findByIdAndDelete(req.user.id);
         res.json({ success: true, message: "Candidate account has been deleted" });

@@ -9,6 +9,7 @@ import candidateAuthRoutes from './routes/candidateAuth.js';
 import employeeAuthRoutes from './routes/employerAuth.js';
 import jobRoutes from './routes/jobs.js';
 import applicationRoutes from './routes/applications.js';
+import { apiLimiter } from './middleware/rateLimiter.js';
 
 connectToMongo();
 
@@ -20,6 +21,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT;
+
+// Apply the rate limiter API routes
+app.use('/api', apiLimiter);
 
 // middleware to resolve CORS 
 app.use(cors());

@@ -2,12 +2,13 @@ import express from 'express';
 import {body, validationResult} from 'express-validator';
 
 import verifyUser from '../middleware/verifyUser.js';
+import { authLimiter } from '../middleware/rateLimiter.js';
 import {register, login, getuser, updateUser, deleteUser} from '../controllers/employerAuthController.js';
 
 const router = express.Router();
 
 // ROUTE 1: Register a Company/Employer
-router.post('/register', [
+router.post('/register', authLimiter, [
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password must be at least 5 characters').isLength({ min: 5 }),
     body('companyName', 'Company name is required').notEmpty(),
@@ -30,7 +31,7 @@ router.post('/register', [
 ], register);
 
 // ROUTE 2: Login for Company/Employer
-router.post('/login', [
+router.post('/login', authLimiter, [
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password cannot be empty').exists()
 ], login);

@@ -1,13 +1,14 @@
 import express from 'express';
 import {body, validationResult} from 'express-validator';
 
+import { authLimiter } from '../middleware/rateLimiter.js';
 import verifyUser from '../middleware/verifyUser.js';
 import {register, login, getcandidates, updateCandidate, changePassword, deleteCandidate, toggleSaveJob, getSavedJobs} from '../controllers/candidateAuthController.js';
 
 const router = express.Router();
 
 // ROUTE 1: register a Job Seeker
-router.post('/register', [
+router.post('/register', authLimiter, [
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password must be at least 5 characters long').isLength({ min: 5 }),
     body('firstName', 'First name is required').notEmpty(),
@@ -24,7 +25,7 @@ router.post('/register', [
 ], register);
 
 // ROUTE 2: login for Job Seeker
-router.post('/login', [
+router.post('/login', authLimiter, [
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password cannot be empty').exists()
 ], login);

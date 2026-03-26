@@ -1,5 +1,7 @@
 import Job from '../models/Job.js';
 import {body, validationResult} from 'express-validator';
+import fs from 'fs';
+import Application from '../models/Application.js';
 
 export const fetchalljobs = async (req, res) => {
     try {
@@ -148,6 +150,17 @@ export const deletejob = async (req, res) => {
         if (job.employer.toString() !== req.user.id) {
             return res.status(401).json({ success: false, error: "Not Allowed: You can only delete your own job posts." });
         }
+
+        const applications = await Application.find({ job: req.params.postId });
+
+        // loop through each application and delete the physical pdf file from the server
+        applications.forEach(app => {
+            if (app.resume && fs.existsSync(app.resume)) {
+                fs.unlinkSync(app.resume);
+            }
+        });
+
+        await Application.deleteMany({ job: req.params.postId });
 
         await Job.findByIdAndDelete(req.params.postId);
         res.json({ success: true, message: "Job has been deleted successfully" });
