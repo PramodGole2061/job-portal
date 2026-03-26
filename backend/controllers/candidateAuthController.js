@@ -148,6 +148,43 @@ export const updateCandidate = async (req, res) => {
     }
 }
 
+export const changePassword = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    try {
+        if (req.user.role !== 'candidate') {
+            return res.status(403).json({ success: false, error: "Access denied." });
+        }
+
+        const { oldPassword, newPassword } = req.body;
+
+        const candidate = await Candidate.findById(req.user.id);
+        if (!candidate) {
+            return res.status(404).json({ success: false, error: "User not found." });
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, candidate.password);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, error: "Incorrect old password. Please try again." });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+        candidate.password = hashedNewPassword;
+        await candidate.save();
+
+        res.json({ success: true, message: "Password has been changed successfully!" });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
 export const deleteCandidate = async (req, res) => {
     if(req.params.userId !== req.user.id){
         return res.status(401).json("You are not authorized to delete the user!");

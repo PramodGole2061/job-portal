@@ -2,7 +2,7 @@ import express from 'express';
 import {body, validationResult} from 'express-validator';
 
 import verifyUser from '../middleware/verifyUser.js';
-import {register, login, getcandidates, updateCandidate, deleteCandidate, toggleSaveJob, getSavedJobs} from '../controllers/candidateAuthController.js';
+import {register, login, getcandidates, updateCandidate, changePassword, deleteCandidate, toggleSaveJob, getSavedJobs} from '../controllers/candidateAuthController.js';
 
 const router = express.Router();
 
@@ -44,5 +44,11 @@ router.post('/save-job/:jobId', verifyUser, toggleSaveJob);
 
 // ROUTE 7: get all saved jobs for candidate 
 router.get('/saved-jobs', verifyUser, getSavedJobs);
+
+// ROUTE 8: Change Password
+router.put('/change-password', verifyUser,[
+    body('oldPassword', 'Old password is required').exists(),
+    body('newPassword', 'New password must be at least 5 characters long').isLength({ min: 5 })
+], changePassword);
 
 export default router;
